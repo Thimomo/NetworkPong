@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Networking.JsonObjects
 {
-    internal class NoChangeMessage : MessagePacket
+    public class NoChangeMessage : MessagePacket
     {
-        public uint tickNumber;
+        public int tickNumber;
         public sbyte direction;
 
         public NoChangeMessage() 

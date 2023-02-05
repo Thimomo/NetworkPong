@@ -23,6 +23,8 @@ namespace GameStates
 
         UpdatePaddleMessage message;
         UpdatePaddleMessage lastReceivedMessage;
+        NoChangeMessage noChangeMessage;
+
         BaseProject.Game1 main;
         
         int tickCounter = 0;
@@ -56,6 +58,7 @@ namespace GameStates
             Add(tickCounterText);
 
             message = new UpdatePaddleMessage();
+            noChangeMessage = new NoChangeMessage();
 
            lastReceivedMessage = message;
         }
@@ -142,8 +145,21 @@ namespace GameStates
                 message.direction = 0;
             }
             //now, send your message:
+
+            noChangeMessage.tickNumber = tickCounter;
+            noChangeMessage.direction = lastReceivedMessage.direction;
+
+            if (lastReceivedMessage.direction == message.direction)
+            {
+                main.SendObject(lastReceivedMessage);
+            }
+            else
+            {
+                main.SendObject(message);
+            }
+
             message.position = myPaddle.Position;
-            main.SendObject(message);
+            
             //-------------
 
         }
