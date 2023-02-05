@@ -7,6 +7,7 @@ using Networking.JsonObjects;
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace GameStates
@@ -21,6 +22,7 @@ namespace GameStates
         TextGameObject tickCounterText;
 
         UpdatePaddleMessage message;
+        UpdatePaddleMessage lastReceivedMessage;
         BaseProject.Game1 main;
         
         int tickCounter = 0;
@@ -54,6 +56,8 @@ namespace GameStates
             Add(tickCounterText);
 
             message = new UpdatePaddleMessage();
+
+           lastReceivedMessage = message;
         }
 
         public void StartGame(int id)
@@ -103,6 +107,13 @@ namespace GameStates
                 ball.BounceHorizontal();
             }
 
+            if(lastReceivedMessage != null)
+            {
+                theirPaddle.Position = new Vector2(theirPaddle.Position.X, lastReceivedMessage.position.Y
+                    + (lastReceivedMessage.direction * (tickCounter - lastReceivedMessage.tickNumber) * yIncr.Y));
+            }
+
+
             //Update ball (nb: DON'T replace this with MonoGame's Update; messes up the determinism of frames)
             ball.Tick();
 
@@ -128,6 +139,7 @@ namespace GameStates
             else
             {
                 myPaddle.Velocity = Vector2.Zero;
+                message.direction = 0;
             }
             //now, send your message:
             message.position = myPaddle.Position;
