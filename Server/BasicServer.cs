@@ -56,7 +56,11 @@ namespace Server
                 case State.Started:
                     if (returnData.Contains("UPDATE_POS"))
                         SendAllExceptPort(port, receiveBytes);
+                    
                     //else if (etc)
+
+
+
                     break;
             }
             

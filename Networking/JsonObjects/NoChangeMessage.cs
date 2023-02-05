@@ -11,7 +11,7 @@ namespace Networking.JsonObjects
 
         public NoChangeMessage() 
         {
-        
+            msgType = "NO_CHANGE";
         }
     }
 }

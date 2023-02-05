@@ -24,12 +24,14 @@ namespace GameStates
         UpdatePaddleMessage message;
         UpdatePaddleMessage lastReceivedMessage;
         NoChangeMessage noChangeMessage;
+        PaddleHitMessage paddleHitMessage;
 
         BaseProject.Game1 main;
         
         int tickCounter = 0;
         //physics:
         Vector2 yIncr = new Vector2(0, 10);
+        Vector2 lastPosition = new Vector2(0,0);
 
         //variables used for checking dropped frames..
         Stopwatch stopWatch;  
@@ -59,6 +61,7 @@ namespace GameStates
 
             message = new UpdatePaddleMessage();
             noChangeMessage = new NoChangeMessage();
+            paddleHitMessage = new PaddleHitMessage();
 
            lastReceivedMessage = message;
         }
@@ -108,18 +111,21 @@ namespace GameStates
             if (ball.CollidesWith(leftPaddle) || ball.CollidesWith(rightPaddle))
             {
                 ball.BounceHorizontal();
+                paddleHitMessage.position = myPaddle.Position;
+                paddleHitMessage.tickNumber = (uint)tickCounter;
+                paddleHitMessage.ballPosition = new Vector2((float)ball.x, (float)ball.y);
+                paddleHitMessage.ballDirection = new Vector2((float)ball.vx, (float)ball.vy);
+                main.SendObject(paddleHitMessage);
             }
 
             if(lastReceivedMessage != null)
             {
-                theirPaddle.Position = new Vector2(theirPaddle.Position.X, lastReceivedMessage.position.Y
+                theirPaddle.Position = new Vector2(lastPosition.X, lastPosition.Y
                     + (lastReceivedMessage.direction * (tickCounter - lastReceivedMessage.tickNumber) * yIncr.Y));
             }
 
-
             //Update ball (nb: DON'T replace this with MonoGame's Update; messes up the determinism of frames)
             ball.Tick();
-
         }
 
         /// <summary>
@@ -144,14 +150,15 @@ namespace GameStates
                 myPaddle.Velocity = Vector2.Zero;
                 message.direction = 0;
             }
-            //now, send your message:
 
             noChangeMessage.tickNumber = tickCounter;
             noChangeMessage.direction = lastReceivedMessage.direction;
 
+            //now, send your message:
+
             if (lastReceivedMessage.direction == message.direction)
             {
-                main.SendObject(lastReceivedMessage);
+                main.SendObject(noChangeMessage);
             }
             else
             {
@@ -161,7 +168,6 @@ namespace GameStates
             message.position = myPaddle.Position;
             
             //-------------
-
         }
 
         /// <summary>
@@ -173,10 +179,19 @@ namespace GameStates
             //When Other paddle is moved
             if (returnData.Contains("UPDATE_POS"))
             {
-                UpdatePaddleMessage msg = JsonConvert.DeserializeObject<UpdatePaddleMessage>(returnData);
-                theirPaddle.Position = msg.position;     
+                lastReceivedMessage = JsonConvert.DeserializeObject<UpdatePaddleMessage>(returnData);
+                lastPosition = (lastReceivedMessage as UpdatePaddleMessage).position;   
             }
-        }
+            else if (returnData.Contains("HIT"))
+            {
+                lastReceivedMessage = JsonConvert.DeserializeObject<UpdatePaddleMessage>(returnData);
+                theirPaddle.Position = lastReceivedMessage.position;
+                ball.vx = (int)lastReceivedMessage.position.X;
+                ball.vy = (int)lastReceivedMessage.position.Y;
+                ball.x = (int)(lastReceivedMessage.position.X + ball.vx * (tickCounter - lastReceivedMessage.tickNumber));
+                ball.y = (int)(lastReceivedMessage.position.Y + ball.vy * (tickCounter - lastReceivedMessage.tickNumber));
+            }
+        } 
         //--------------------------------------------------------
 
         /// <summary>
@@ -207,8 +222,6 @@ namespace GameStates
                 if (attempts >= MAX_ATTEMPTS) break;
             }
             
-
-
             base.Update(gameTime);
         }
 
@@ -221,9 +234,5 @@ namespace GameStates
         {
             
         }
-        
-        
-       
-
     }
 }

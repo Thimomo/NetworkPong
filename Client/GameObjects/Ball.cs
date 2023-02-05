@@ -5,10 +5,10 @@ using System.Text;
 
 namespace Client.GameObjects
 {
-    internal class Ball : RotatingSpriteGameObject
+    public class Ball : RotatingSpriteGameObject
     {
-        int x, y;
-        int vx, vy;
+        public int x, y;
+        public int vx, vy;
         Vector2 pos = new Vector2();
         //Vector2 bounceVertical = new Vector2(1, -1);
         //Vector2 bounceHorizontal = new Vector2(-1, 1);
