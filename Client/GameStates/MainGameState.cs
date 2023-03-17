@@ -114,7 +114,7 @@ namespace GameStates
                 paddleHitMessage.position = myPaddle.Position;
                 paddleHitMessage.tickNumber = (uint)tickCounter;
                 paddleHitMessage.ballPosition = new Vector2((float)ball.x, (float)ball.y);
-                paddleHitMessage.ballDirection = new Vector2((float)ball.vx, (float)ball.vy);
+                paddleHitMessage.ballDirection = new Vector2((float)ball.dir.X, (float)ball.dir.Y);
                 main.SendObject(paddleHitMessage);
             }
 
@@ -186,10 +186,8 @@ namespace GameStates
             {
                 lastReceivedMessage = JsonConvert.DeserializeObject<UpdatePaddleMessage>(returnData);
                 theirPaddle.Position = lastReceivedMessage.position;
-                ball.vx = (int)lastReceivedMessage.position.X;
-                ball.vy = (int)lastReceivedMessage.position.Y;
-                ball.x = (int)(lastReceivedMessage.position.X + ball.vx * (tickCounter - lastReceivedMessage.tickNumber));
-                ball.y = (int)(lastReceivedMessage.position.Y + ball.vy * (tickCounter - lastReceivedMessage.tickNumber));
+                ball.dir = lastReceivedMessage.direction;             
+                ball.Position = (lastReceivedMessage.position + ball.dir * (tickCounter - lastReceivedMessage.tickNumber));
             }
         } 
         //--------------------------------------------------------

@@ -9,7 +9,7 @@ namespace Networking.JsonObjects
     {
         public uint tickNumber;
         public Vector2 position;
-        public sbyte direction;
+        public Vector2 direction;
         public UpdatePaddleMessage() 
         {
             msgType = "UPDATE_POS";        
